@@ -12,7 +12,6 @@ class PlacesController < ApplicationController
 
   def update
     @place = Place.find(params[:id])
-    debugger
     if @place.update_attributes(place_params)
       flash[:success] = 'Changes successful!'
       redirect_to places_path
@@ -34,7 +33,6 @@ class PlacesController < ApplicationController
       redirect_to action: 'index'
     else
       @errors = @place.errors
-      debugger
       render :new
     end
   end
