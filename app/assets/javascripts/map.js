@@ -22,7 +22,22 @@ var all = function() {
       .addTo(map);
   });
   console.log(window.placesJson[0]);
-}
+
+  jQuery('#reverse_geocoding').click(function() {
+    jQuery.ajax({
+      type: 'POST',
+      url: '/reverse_geocoding',
+      data: {longitude: 12, latitude: 52},
+      dataType: 'script',
+      success: function(response) {
+        console.log('success');
+      },
+      error: function(xhr) {
+        console.log(xhr.responseText);
+      }
+    });
+  });
+};
 
 jQuery(function() { all(); });
 jQuery(document).on('page:load', all);

@@ -1,4 +1,6 @@
 #map{:style => "height: 300px;"} map
+#reverse_geocoding
+  reverse geocoding
 
 :javascript
   window.places = #{@places.map { |p| [p.latitude, p.longitude, p.name] }}
