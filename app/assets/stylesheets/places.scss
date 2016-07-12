@@ -41,6 +41,12 @@ textarea {
   padding: 10px;
 }
 
-.review_table_head, .review_table_headline{
+.review_table_head, .review_table_headline, .review_table_locale_header{
   text-align: center;
+}
+
+.review_table_locale_header{
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-style: italic;
 }

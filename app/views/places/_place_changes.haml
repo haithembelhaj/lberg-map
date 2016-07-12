@@ -5,10 +5,10 @@
       = t('place_features')
 %tr
   %td.last_reviewed_version-name
-    - if @place.last_reviewed_place_version
+    - if @place.last_reviewed_version_of(@place)
       %b
         name:
-      = @place.last_reviewed_place_version.name
+      = @place.last_reviewed_version_of(@place).name
   %td.recent_unreviewed_version-name
     - if @place.has_history?(@place)
       %b
@@ -18,10 +18,10 @@
 -# ADDRESS
 %tr
   %td.last_reviewed_version-address
-    - if @place.last_reviewed_place_version
+    - if @place.last_reviewed_version_of(@place)
       %b
         address:
-      = @place.last_reviewed_place_version.address
+      = @place.last_reviewed_version_of(@place).address
   %td.recent_unreviewed_version-address
     - if @place.has_history?(@place)
       %b

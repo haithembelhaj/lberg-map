@@ -34,11 +34,11 @@ class Place < ActiveRecord::Base
     end
   end
 
-  def last_reviewed_translation_version(translation)
-    if translation.reviewed
-      translation
-    elsif has_history?(translation)
-      translation.versions[1..-1].map(&:reify).select(&:reviewed).last
+  def last_reviewed_version_of(obj)
+    if has_history?(obj)
+      obj.versions[1..-1].map(&:reify).select(&:reviewed).last
+    elsif obj.reviewed
+      obj
     end
   end
 

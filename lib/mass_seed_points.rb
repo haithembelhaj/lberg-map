@@ -80,6 +80,17 @@ module MassSeedPoints
                    )
   end
 
+  def self.introduce_random_changes_to(place)
+    place.name = random_latin_string(rand(10..20))
+    place.postal_code = n_random_digits
+
+    place.translations.each do |t|
+      t.description = latin_lorem_ipsum(rand(10..90)) if [true,false].sample
+      t.save
+    end
+    place
+  end
+
   def self.generate(number_of_points:, city:)
     @cityname = city
     unless bbox = bbox_from_cityname(@cityname)
@@ -96,6 +107,17 @@ module MassSeedPoints
     number_of_points.times.with_index do |i|
       generate_point(rand(1..5), bbox)
       STDOUT.write "\rGenerating points: point #{i + 1}/#{number_of_points} created"
+    end
+
+    # Create changes to 50% points
+    if number_of_points > 1
+      (number_of_points/2).times do
+        p = Place.all.sample
+        rand(1..3).times do
+          introduce_random_changes_to(p).save(validate: false)
+          sleep(rand(1..3))
+        end
+      end
     end
   end
 end

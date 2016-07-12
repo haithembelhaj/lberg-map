@@ -15,6 +15,10 @@ module PlacesHelper
     current_version_index + direction < 0 ? nil : version_id
   end
 
+  def get_version_date(current_version_id)
+    PaperTrail::Version.find(current_version_id).created_at.strftime('%d.%m.%y %T')
+  end
+
   def provide_place_version_browsing
     links = []
     if previous_version_id = adjecent_version_id(@place, @current_version_ids[:place], -1)
@@ -22,12 +26,13 @@ module PlacesHelper
                        place_version: previous_version_id,
                        translations_versions: @current_version_ids[:translations])
     end
+    links << "(#{get_version_date(@current_version_ids[:place])})"
     if next_version_id = adjecent_version_id(@place, @current_version_ids[:place], +1)
       links << link_to('Next change >',
                        place_version: next_version_id,
                        translations_versions: @current_version_ids[:translations])
     end
-    raw links.join(' ... ')
+    raw links.join(' ')
   end
 
   def provide_translation_version_browsing(translation)
@@ -40,6 +45,7 @@ module PlacesHelper
                        translations_versions: prev_translation_version,
                        place_version: adjecent_version_id(@place, @current_version_ids[:place], 0))
     end
+    links << "(#{get_version_date(@current_version_ids[:translations][language])})"
     next_translation_version = @current_version_ids[:translations].dup
     if next_version_id = adjecent_version_id(translation, next_translation_version[language], +1)
       next_translation_version[language] = next_version_id
@@ -47,6 +53,6 @@ module PlacesHelper
                        translations_versions: next_translation_version,
                        place_version: adjecent_version_id(@place, @current_version_ids[:place], 0))
     end
-    raw links.join(' ... ')
+    raw links.join(' ')
   end
 end
