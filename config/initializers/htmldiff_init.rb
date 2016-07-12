@@ -1,5 +1,1 @@
-require 'htmldiff'
-
-class Diff
-  extend HTMLDiff
-end
+Differ.format = :html

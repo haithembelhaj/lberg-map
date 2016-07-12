@@ -1,5 +1,6 @@
 fr:
   select_this_language: 'Sélectionnez cette langue'
+  language: 'francais'
   all: 'Toutes'
   locate_me: 'Mein Standort'
   simple_captcha:

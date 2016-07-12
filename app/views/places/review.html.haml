@@ -11,9 +11,11 @@
         = render 'categories_changes'
         = render 'translations_changes'
 
-  .row
-    .text-center.margin-below
-      = form_for @place, url: { action: :update_reviewed, params: { place_version: @current_version_id } } do |f|
-        = f.submit 'submit', class: 'btn btn-primary btn-success place-form-button'
-      = link_to t('revert_changes'), action_name == 'review' ? places_path : root_path, class: 'btn btn-primary btn-warning place-form-button'
-      = link_to t('back'), action_name == 'review' ? places_path : root_path, class: 'btn btn-primary btn-danger place-form-button'
+    .col-xs-12.margin-below
+      .col-xs-6.col-md-2
+        = form_for @place, url: { action: :update_reviewed, params: { place_version: @current_version_id } } do |f|
+          = f.submit 'submit', class: 'btn btn-primary btn-success place-form-button'
+      .col-xs-6.col-md-2
+        = link_to t('revert_changes'), action_name == 'review' ? places_path : root_path, class: 'btn btn-primary btn-warning place-form-button'
+      .col-xs-6.col-md-2
+        = link_to t('back'), action_name == 'review' ? unreviewed_path : places_path, class: 'btn btn-primary btn-danger place-form-button'

@@ -32,6 +32,7 @@ class PlacesController < ApplicationController
     @translations = @place.translations.map do |t|
       t.versions.find(@current_version_ids[:translations][t.locale].to_i).reify || t
     end
+    @last_reviewed_place = @place.last_reviewed_version_of(@place)
   end
 
   def update_reviewed

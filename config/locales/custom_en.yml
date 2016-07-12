@@ -1,5 +1,6 @@
 en:
   select_this_language: 'Select this language'
+  language: 'english'
   all: 'All'
   locate_me: 'Locate me'
   simple_captcha:

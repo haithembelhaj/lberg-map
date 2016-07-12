@@ -1,0 +1,9 @@
+del{
+color:           hsl(0, 90%, 65%);
+text-decoration: line-through;
+text-decoration: black double line-through; /* Ignored in CSS1/CSS2 UAs */
+}
+
+ins{
+color:           hsl(114, 67%, 55%);
+}

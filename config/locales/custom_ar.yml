@@ -1,4 +1,6 @@
 ar:
+  select_this_language: 'Wähle diese Sprache'
+  language: 'العربية'
   all: 'Alle'
   locate_me: 'Mein Standort'
   simple_captcha:

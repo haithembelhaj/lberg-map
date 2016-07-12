@@ -26,7 +26,7 @@ module PlacesHelper
                        place_version: previous_version_id,
                        translations_versions: @current_version_ids[:translations])
     end
-    links << "(#{get_version_date(@current_version_ids[:place])})"
+    links << "(#{get_version_date(@current_version_ids[:place.to_sym])})"
     if next_version_id = adjecent_version_id(@place, @current_version_ids[:place], +1)
       links << link_to('Next change >',
                        place_version: next_version_id,
@@ -45,7 +45,7 @@ module PlacesHelper
                        translations_versions: prev_translation_version,
                        place_version: adjecent_version_id(@place, @current_version_ids[:place], 0))
     end
-    links << "(#{get_version_date(@current_version_ids[:translations][language])})"
+    links << "(#{get_version_date(@current_version_ids[:translations][language.to_sym])})"
     next_translation_version = @current_version_ids[:translations].dup
     if next_version_id = adjecent_version_id(translation, next_translation_version[language], +1)
       next_translation_version[language] = next_version_id

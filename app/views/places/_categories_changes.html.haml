@@ -1,12 +1,14 @@
 -# Categories
 %tr
-  %td.review_table_headline{ colspan: 2 }
+  %td
+    %h4
+      = t('categories')
+  %td
     %h4
       = t('categories')
 %tr
   %td.last_reviewed_version-categories
-    - if @place.last_reviewed_place_version
-      = generate_categories_filter_links(@place.last_reviewed_place_version)
+    = generate_categories_filter_links(@last_reviewed_place) if @last_reviewed_place
   %td.recent_unreviewed_version-categories
     - if @place.has_history?(@place)
       = generate_categories_filter_links(@place)
