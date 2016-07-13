@@ -5,7 +5,6 @@ class ApplicationController < ActionController::Base
 
   before_action :set_locale
   helper_method :current_user, :signed_in?, :is_admin?
-  helper_method :translation_versions_hash
   before_filter :set_paper_trail_whodunnit
 
   def set_locale
@@ -34,5 +33,19 @@ class ApplicationController < ActionController::Base
 
   def latest_translation_versions(obj)
     obj.translations.map { |t| [t.locale, t.versions.last.id] }.to_h
+  end
+
+  def set_reviewed_state_from_place_params
+    changes = params['place'].keys.grep(/description/).map do |descr_in_lang|
+      locale = descr_in_lang.split('_').last
+      translation = @place.translations.find_by(locale: locale)
+      translation.description = params['place'][descr_in_lang]
+      [locale, translation.changes]
+    end.to_h
+    changes.select { |k, v| !v.empty? }.keys.each do |locale|
+      translation = @place.translations.find_by(locale: locale)
+      translation.reviewed = (signed_in? ? true : false)
+      translation.without_versioning :save
+    end
   end
 end

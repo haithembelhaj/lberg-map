@@ -1,15 +1,11 @@
 .container
   .row
     .text-center.margin-below
-      .h2= t('review_changes')
-    %table{ id: 'review_table' }
-      %colgroup
-        %col.last_reviewed_version
-        %col.recent_unreviewed_version
-        = render 'review_table_head'
-        = render 'place_changes'
-        = render 'categories_changes'
-        = render 'translations_changes'
+      .h2
+        = t('changes_since_last_reviewed_version')
+    = render 'place_changes'
+    -# = render 'categories_changes'
+    = render 'translations_changes'
 
     .col-xs-12.margin-below
       .col-xs-6.col-md-2

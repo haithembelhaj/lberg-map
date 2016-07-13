@@ -1,30 +1,14 @@
-%tr
-  %td
-    %h4
-      = t('description')
-  %td
-    %h4
-      = t('description')
-
-- @place.translations.each do |translation|
-  %tr
-    %td.review_table_locale_header
-      %strong
+.translations
+  %h4
+    = t('description')
+  - @translations.each do |translation|
+    .translation
+      .translation-header
         = locale_to_name(translation.locale)
-    %td.review_table_locale_header
-      %strong
-        = locale_to_name(translation.locale)
-  %tr
-    %td{ class: "last_reviewed_version-description_#{translation.locale}" }
-      %b
-      - if @place.last_reviewed_version_of(translation)
-        = raw(translation.description)
-
-    %td{ class: "recent_unreviewed_version-description_#{translation.locale}" }
-      - if @place.has_history?(translation) || !translation.reviewed
-        = raw(translation.description)
-  %tr
-    %td
-    %td.recent_unreviewed_version-history
-      %small
+      %div{ class: "description_#{translation.locale}" }
+        - if @place.has_history?(translation) || !translation.reviewed
+          = raw(translation.description)
+        - else
+          no recent changes
+      .version-browser
         = provide_translation_version_browsing(translation)

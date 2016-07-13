@@ -1,41 +1,24 @@
 -# NAME
-%tr
-  %td
-    %h4
-      = t('place_features')
-  %td
-    %h4
-      = t('place_features')
-%tr
-  %td.last_reviewed_version-name
-    - if @last_reviewed_place
-      %b
-        name:
-      = @last_reviewed_place.name
-
-  %td.recent_unreviewed_version-name
+.place_features
+  %h4
+    = t('place_features')
+  .place_features-name
     - if @place.has_history?(@place) || !@place.reviewed
       %b
         name:
       = raw @last_reviewed_place && Differ.diff_by_char(@last_reviewed_place.name, @place.name) || @place.name
+    - else
+      No recent changes
 
--# ADDRESS
-%tr
-  %td.last_reviewed_version-address
-    - if @last_reviewed_place
-      %b
-        address:
-      = @last_reviewed_place.address
-
-  %td.recent_unreviewed_version-address
-    - if @place.has_history?(@place) || !@place.reviewed
+  -# ADDRESS
+  - if @place.has_history?(@place) || !@place.reviewed
+    %p
       %b
         address:
       = raw @last_reviewed_place && Differ.diff_by_char(@last_reviewed_place.address, @place.address) || @place.address
+  - else
+    %p
+      No recent changes
 
--# Version browsing
-%tr
-  %td
-  %td.recent_unreviewed_version-history
-    %small
-      = provide_place_version_browsing
+  -# Version browsing
+  = provide_place_version_browsing

@@ -16,22 +16,14 @@ class Place < ActiveRecord::Base
   ## CALLBACKS
   geocoded_by :address
   before_validation :geocode_with_nodes, if: :address_changed?, on: [:create, :update]
-  after_create :auto_translate
   before_validation :sanitize_descriptions, on: [:create, :update]
+  after_create :auto_translate
 
   ## AUDITING
-  has_paper_trail
+  has_paper_trail ignore: [:translation]
 
   def has_history?(obj)
     obj.versions.length > 1
-  end
-
-  def last_reviewed_place_version
-    if has_history?(self)
-      versions[1..-1].map(&:reify).select(&:reviewed).last
-    elsif reviewed
-      self
-    end
   end
 
   def last_reviewed_version_of(obj)

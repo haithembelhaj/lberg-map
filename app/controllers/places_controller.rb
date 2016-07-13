@@ -1,7 +1,7 @@
 class PlacesController < ApplicationController
   # http_basic_authenticate_with name: 'admin', password: 'secret'
   include SimpleCaptcha::ControllerHelpers
-  before_action :require_login, only: [:review, :update_reviewed]
+  before_action :require_login, only: [:index_unreviewed, :review, :update_reviewed]
 
   def index
     if params[:category]
@@ -46,6 +46,7 @@ class PlacesController < ApplicationController
     @place = Place.find(params[:id])
     @place.reviewed = (signed_in? ? true : false)
     if simple_captcha_valid? || signed_in?
+      set_reviewed_state_from_place_params
       save_update
     else
       flash.now[:danger] = 'Captcha not valid!'
