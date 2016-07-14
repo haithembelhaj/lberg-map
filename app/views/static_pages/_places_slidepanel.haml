@@ -2,7 +2,15 @@
   .hide-slidepanel.glyphicon.glyphicon-remove.pull-right
   %h4.slidepanel-title= t('places')
   .content
-    #accordion.panel-group.col-xs-12.places-list
+    .panel.panel-default
+      .panel-heading
+        %h4.panel-title
+          %a{"data-parent" => "#accordion1", "data-toggle" => "collapse", :href => "#collapseThree"}
+            Collapsible Group Item #3
+      #collapseThree.panel-collapse.collapse
+        .panel-body
+          #accordion.panel-group.places-list
+            // Template goes here
 
 .panel.panel-default.accordion-panel-template
   .panel-heading

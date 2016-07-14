@@ -25,7 +25,7 @@ jQuery(function() {
         }
      });
 
-    var placeSlidePanel = jQuery('.place-slidepanel')
+    var placeSlidePanel = jQuery('.place-slidepanel');
     var onEachFeature = function(feature, layer) {
       layer.on('click', function(e) {
         placeSlidePanel.find('.edit-place').attr('place_id', feature.properties.id);
