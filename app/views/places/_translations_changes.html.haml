@@ -1,0 +1,19 @@
+%tr
+  %td.review_table_headline{ colspan: 2 }
+    %h4
+      = t('descriptions')
+- @place.translations.each do |t|
+  %tr
+    %td
+      = t.locale.to_s + ':'
+    %td
+      = t.locale.to_s + ':'
+  %tr
+    %td{class: "recent_unreviewed_version-translation_#{t.locale}"}
+      %b
+      = raw(t.description) if t.reviewed
+
+    %td{class: "last_reviewed_version-translation_#{t.locale}"}
+      %b
+      - if t = @place.last_reviewed_translation_version(t)
+        = raw(t.description)

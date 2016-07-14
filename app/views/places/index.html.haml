@@ -7,14 +7,16 @@
       %th= Place.human_attribute_name('categories')
       %th.col-md-1= Place.human_attribute_name('longitude')
       %th.col-md-1= Place.human_attribute_name('latitude')
+      %th.col-md-1= Place.human_attribute_name('reviewed')
     %tbody
     - @places.each do |place|
       %tr
         %td
           = link_to edit_place_path(place) do
             %span{class: 'glyphicon glyphicon-pencil'}
-          = link_to review_path(place) do
-            %span{class: 'glyphicon glyphicon-repeat'}
+          - if signed_in?
+            = link_to review_path(place) do
+              %span{class: 'glyphicon glyphicon-repeat'}
           = link_to place_path(place), {method: "delete", data: { confirm: "Bist du dir sicher, dass du den Eintrag löschen willst?" }} do
             %span{class: 'glyphicon glyphicon-trash'}
         %td
@@ -27,3 +29,5 @@
           = place.latitude
         %td
           = place.longitude
+        %td
+          = place.reviewed

@@ -12,10 +12,14 @@
 # It's strongly recommended that you check this file into your version control system.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 20160713165510) do
 =======
 ActiveRecord::Schema.define(version: 20160711154129) do
 >>>>>>> 2a74096... Add basic auditing for place and translations via paper_trail and globalize-versioning
+=======
+ActiveRecord::Schema.define(version: 20160711190640) do
+>>>>>>> 6f316db... Add reviewed flag to place translations, finish basic reviewing view (wip), minor changes to mass_seed_points
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -47,12 +51,21 @@ ActiveRecord::Schema.define(version: 20160711154129) do
   add_index "category_translations", ["locale"], name: "index_category_translations_on_locale", using: :btree
 
   create_table "place_translations", force: :cascade do |t|
+<<<<<<< HEAD
     t.integer  "place_id",                        null: false
     t.string   "locale",                          null: false
     t.datetime "created_at",                      null: false
     t.datetime "updated_at",                      null: false
     t.text     "description"
     t.boolean  "auto_translated", default: false, null: false
+=======
+    t.integer  "place_id",                    null: false
+    t.string   "locale",                      null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+    t.text     "description"
+    t.boolean  "reviewed",    default: false, null: false
+>>>>>>> 6f316db... Add reviewed flag to place translations, finish basic reviewing view (wip), minor changes to mass_seed_points
   end
 
   add_index "place_translations", ["locale"], name: "index_place_translations_on_locale", using: :btree

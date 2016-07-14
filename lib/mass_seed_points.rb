@@ -42,7 +42,7 @@ module MassSeedPoints
     category_ids = Category.all.map(&:id)
     place_id = Place.last.id + 1
 
-    Place.new(id: place_id,
+    p = Place.new(id: place_id,
               name: random_latin_string(rand(10..20)),
               street: random_latin_string(rand(5..10)).capitalize + '-Straße',
               house_number: n_random_digits(rand(1..3), 1),
@@ -55,7 +55,14 @@ module MassSeedPoints
               description_fr: latin_lorem_ipsum(rand(10..90)),
               description_ar: arab_lorem_ipsum(rand(10..90)),
               reviewed: [true,false].sample
-             ).save(validate: false)
+             )
+
+    p.translations.each do |translation|
+      translation.reviewed = [true, false].sample
+      translation.save
+    end
+
+    p.save(validate: false)
 
     no_of_categories.times do
       Categorizing.create(category_id: category_ids.shuffle.pop,

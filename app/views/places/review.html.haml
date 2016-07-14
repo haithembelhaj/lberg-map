@@ -1,11 +1,19 @@
 .container
   .row
-    .col-xs-6
-      = render 'last_reviewed_place'
-    .col-xs-6
-      = render 'place_versions'
+    .text-center.margin-below
+      .h2= t('review_changes')
+    %table{ id: 'review_table' }
+      %colgroup
+        %col.last_reviewed_version
+        %col.recent_unreviewed_version
+        = render 'review_table_head'
+        = render 'place_changes'
+        = render 'categories_changes'
+        = render 'translations_changes'
+
   .row
     .text-center.margin-below
       = form_for @place, url: { action: :update_reviewed, params: { place_version: @current_version_id } } do |f|
         = f.submit 'submit', class: 'btn btn-primary btn-success place-form-button'
+      = link_to t('revert_changes'), action_name == 'review' ? places_path : root_path, class: 'btn btn-primary btn-warning place-form-button'
       = link_to t('back'), action_name == 'review' ? places_path : root_path, class: 'btn btn-primary btn-danger place-form-button'

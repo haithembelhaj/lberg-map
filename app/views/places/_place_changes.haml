@@ -1,0 +1,35 @@
+-# NAME
+%tr
+  %td.review_table_headline{ colspan: 2 }
+    %h4
+      = t('place_features')
+%tr
+  %td.last_reviewed_version-name
+    - if @place.last_reviewed_place_version
+      %b
+        name:
+      = @place.last_reviewed_place_version.name
+  %td.recent_unreviewed_version-name
+    - if @place.has_history?(@place)
+      %b
+        name:
+      = @place.name
+
+-# ADDRESS
+%tr
+  %td.last_reviewed_version-address
+    - if @place.last_reviewed_place_version
+      %b
+        address:
+      = @place.last_reviewed_place_version.address
+  %td.recent_unreviewed_version-address
+    - if @place.has_history?(@place)
+      %b
+        address:
+      = @place.address
+
+-# Version browsing
+%tr
+  %td
+  %td.recent_unreviewed_version-history
+    = provide_place_version_browsing

@@ -25,3 +25,22 @@ textarea {
  resize: all;
  overflow-y: auto !important;
 }
+
+// Review table layout
+#review_table{
+  width: 100%;
+}
+
+.last_reviewed_version{
+  width: 50%;
+  padding: 10px;
+}
+
+.recent_unreviewed_version{
+  width: 50%;
+  padding: 10px;
+}
+
+.review_table_head, .review_table_headline{
+  text-align: center;
+}

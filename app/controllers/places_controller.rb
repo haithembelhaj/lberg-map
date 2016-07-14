@@ -24,7 +24,6 @@ class PlacesController < ApplicationController
 
   def review
     @place = Place.find(params[:id])
-    @place_last_reviewed = @place.last_reviewed_place
     @current_version_ids = {
       place: params[:place_version] || @place.versions.last.id,
       translations: params[:translations_versions] || latest_translation_versions(@place)
