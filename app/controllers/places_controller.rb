@@ -35,19 +35,12 @@ class PlacesController < ApplicationController
     @last_reviewed_place = @place.last_reviewed_version_of(@place)
   end
 
-  def update_reviewed
-    @place = Place.find(params[:id])
-    @place = @place.versions.find(params[:place_version].to_i).reify if params[:place_version]
-    @place.reviewed = true
-    save_reviewed_changes
-  end
-
   def update
     @place = Place.find(params[:id])
     @place.reviewed = (signed_in? ? true : false)
     if simple_captcha_valid? || signed_in?
-      set_reviewed_state_from_place_params
-      save_update
+      save_translations_updates
+      save_place_update
     else
       flash.now[:danger] = 'Captcha not valid!'
       render :edit
@@ -84,16 +77,6 @@ class PlacesController < ApplicationController
 
   private
 
-  def save_update
-    if @place.update_attributes(place_params)
-      flash.now[:success] = 'Point successfully changed!'
-      redirect_to places_path
-    else
-      flash.now[:danger] = @place.errors.full_messages.to_sentence
-      render :edit
-    end
-  end
-
   def save_new
     if @place.save
       flash[:success] = 'Point successfully created!'
@@ -104,13 +87,44 @@ class PlacesController < ApplicationController
     end
   end
 
-  def save_reviewed_changes
-    if @place.save
-      flash[:success] = 'Changes saved!'
-      redirect_to action: 'index'
+  # Save Updates on places and translations seperately in order to not accidentally create duplicate versions
+  def extract_place_attr_from(place_params)
+    place_params.keys.grep(/^(description_)/).map do |k|
+      [k, place_params[k]]
+    end.to_h
+  end
+
+  def extract_translation_attr_from(place_params)
+    place_params.keys.grep(/description_/).map do |k|
+      [k, place_params[k]]
+    end.to_h
+  end
+
+  def changed_descriptions
+    changes = extract_translation_attr_from(place_params).keys.map do |descr_in_lang|
+      locale = descr_in_lang.split('_').last
+      translation = @place.translations.find_by(locale: locale)
+      translation.description = params['place'][descr_in_lang]
+      [locale, translation.changes]
+    end
+    changes.select { |_k, v| !v.empty? }.to_h
+  end
+
+  def save_translations_updates
+    changed_descriptions.each do |locale, description_changes|
+      translation = @place.translations.find_by(locale: locale)
+      translation.update_attributes(reviewed: (signed_in? ? true : false),
+                                    description: description_changes['description'].last)
+    end
+  end
+
+  def save_place_update
+    if @place.update_attributes(extract_place_attr_from(place_params))
+      flash.now[:success] = 'Point successfully changed!'
+      redirect_to places_path
     else
       flash.now[:danger] = @place.errors.full_messages.to_sentence
-      render :review
+      render :edit
     end
   end
 

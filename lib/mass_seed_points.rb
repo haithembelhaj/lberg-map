@@ -84,11 +84,10 @@ module MassSeedPoints
     place.name = random_latin_string(rand(10..20))
     place.postal_code = n_random_digits
 
-    place.translations.each do |t|
-      t.description = latin_lorem_ipsum(rand(10..90)) if [true,false].sample
-      t.save
+    place.translations.each do |translation|
+      place.translation.update_attributes description: latin_lorem_ipsum(rand(10..90)) if [true, false].sample
     end
-    place
+    return place
   end
 
   def self.generate(number_of_points:, city:)
