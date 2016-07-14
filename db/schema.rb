@@ -11,7 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 20160713165510) do
+=======
+ActiveRecord::Schema.define(version: 20160711154129) do
+>>>>>>> 2a74096... Add basic auditing for place and translations via paper_trail and globalize-versioning
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -84,6 +88,19 @@ ActiveRecord::Schema.define(version: 20160713165510) do
     t.string   "password_digest"
     t.boolean  "is_admin",        default: false
   end
+
+  create_table "versions", force: :cascade do |t|
+    t.string   "item_type",      null: false
+    t.integer  "item_id",        null: false
+    t.string   "event",          null: false
+    t.string   "whodunnit"
+    t.text     "object"
+    t.datetime "created_at"
+    t.string   "locale"
+    t.text     "object_changes"
+  end
+
+  add_index "versions", ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id", using: :btree
 
   add_foreign_key "categorizings", "categories"
   add_foreign_key "categorizings", "places"

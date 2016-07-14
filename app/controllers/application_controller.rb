@@ -5,6 +5,8 @@ class ApplicationController < ActionController::Base
 
   before_action :set_locale
   helper_method :current_user, :signed_in?, :is_admin?
+  helper_method :translation_versions_hash
+  before_filter :set_paper_trail_whodunnit
 
   def set_locale
     if params[:locale]
@@ -28,5 +30,9 @@ class ApplicationController < ActionController::Base
 
   def is_admin?
     signed_in? && @current_user.is_admin
+  end
+
+  def latest_translation_versions(obj)
+    obj.translations.map { |t| [t.locale, t.versions.last.id] }.to_h
   end
 end

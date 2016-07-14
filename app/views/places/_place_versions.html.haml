@@ -1,0 +1,27 @@
+.text-center.margin-below
+  .h2= t('review_place')
+.text-center.margin-below
+  .h4 POI features
+%p
+  %b
+    name:
+  = @place.name
+%p
+  %b
+    address:
+  = @place.address
+%p
+  %i
+  = provide_place_version_browsing
+%p
+.text-center.margin-below
+  .h4 Translations
+.poi_features{class: "#{}"}
+  - @translations.each do |t|
+    %p
+      %b
+      = t.locale.to_s + ':'
+    %p
+      = raw t.description
+    %p
+      = provide_translation_version_browsing(t)

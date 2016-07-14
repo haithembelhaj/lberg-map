@@ -11,6 +11,12 @@ Rails.application.routes.draw do
       resources :descriptions
     end
     resources :users
-    get '/review' => 'places#review'
+    # create proper scoping for unreviewed
+    get '/unreviewed' => 'places#index_unreviewed', as: :unreviewed
+    scope 'places' do
+      post '/:id/revert' => 'versions#revert', as: :revert
+      get '/:id/review' => 'places#review', as: :review
+      patch '/:id/review' => 'places#update_reviewed'
+    end
   end
 end

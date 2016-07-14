@@ -1,7 +1,7 @@
 class PlacesController < ApplicationController
   # http_basic_authenticate_with name: 'admin', password: 'secret'
   include SimpleCaptcha::ControllerHelpers
-  before_action :require_login, only: [:review]
+  before_action :require_login, only: [:review, :update_reviewed]
 
   def index
     if params[:category]
@@ -17,13 +17,34 @@ class PlacesController < ApplicationController
     become published!' unless signed_in?
   end
 
-  def review
+  # Reviewing
+  def index_unreviewed
     @places = Place.where(reviewed: false).order('updated_at DESC').paginate(page: params[:page], per_page: 15)
+  end
+
+  def review
+    @place = Place.find(params[:id])
+    @place_last_reviewed = @place.last_reviewed_place
+    @current_version_ids = {
+      place: params[:place_version] || @place.versions.last.id,
+      translations: params[:translations_versions] || latest_translation_versions(@place)
+    }
+    @place = @place.versions.find(@current_version_ids[:place].to_i).reify || @place
+    @translations = @place.translations.map do |t|
+      t.versions.find(@current_version_ids[:translations][t.locale].to_i).reify || t
+    end
+  end
+
+  def update_reviewed
+    @place = Place.find(params[:id])
+    @place = @place.versions.find(params[:place_version].to_i).reify if params[:place_version]
+    @place.reviewed = true
+    save_reviewed_changes
   end
 
   def update
     @place = Place.find(params[:id])
-    @place.reviewed = true if signed_in?
+    @place.reviewed = (signed_in? ? true : false)
     if simple_captcha_valid? || signed_in?
       save_update
     else
@@ -82,10 +103,20 @@ class PlacesController < ApplicationController
     end
   end
 
+  def save_reviewed_changes
+    if @place.save
+      flash[:success] = 'Changes saved!'
+      redirect_to action: 'index'
+    else
+      flash.now[:danger] = @place.errors.full_messages.to_sentence
+      render :review
+    end
+  end
+
   def place_params
     params.require(:place).permit(
     :name, :street, :house_number, :postal_code, :city,
-    :description_en, :description_de, :description_fr, :description_ar,
+    :description_en, :description_de, :description_fr, :description_ar, :version,
     category_ids: []
     )
   end
@@ -95,5 +126,9 @@ class PlacesController < ApplicationController
       flash.now[:danger] = 'Access to this page has been restricted. Please login first!'
       redirect_to login_path
     end
+  end
+
+  def make_revert_link
+    view_context.link_to 'Revert changes!', revert_path(@place.versions.last), method: :post
   end
 end

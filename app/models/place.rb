@@ -10,7 +10,7 @@ class Place < ActiveRecord::Base
   validates :postal_code, format: { with: /\d{5}/, message: 'upply valid postal code (5 digits)' }
 
   ## TRANSLATION
-  translates :description
+  translates :description, versioning: :paper_trail
   globalize_accessors
 
   ## CALLBACKS
@@ -18,6 +18,21 @@ class Place < ActiveRecord::Base
   before_validation :geocode_with_nodes, if: :address_changed?, on: [:create, :update]
   after_create :auto_translate
   before_validation :sanitize_descriptions, on: [:create, :update]
+
+  ## AUDITING
+  has_paper_trail
+
+  def has_history?(obj)
+    obj.versions.length > 1
+  end
+
+  def last_reviewed_place
+    if has_history?(self)
+      versions[1..-1].map(&:reify).select(&:reviewed).last
+    elsif reviewed
+      self
+    end
+  end
 
   ## Language and autotranslation related stuff -> URGENTLY REFACTOR!
   def emptyish?(obj)
@@ -45,6 +60,7 @@ class Place < ActiveRecord::Base
   end
 
   def guess_native_language_description
+    available_locales = I18n.available_locales
     # GUESS NATIVE LANGUAGE (simple: longest description)
     translations_with_descriptions.sort_by do |t|
       t.description.length

@@ -80,7 +80,7 @@ class PlacesControllerTest < ActionController::TestCase
     @place.save
     @place.reload
     session['user_id'] = @user.id
-    get :review, id: @place.id
+    get :index_unreviewed, id: @place.id
     assert_response :success
   end
 
@@ -88,7 +88,7 @@ class PlacesControllerTest < ActionController::TestCase
     session[:user_id] = nil
     @place.save
     @place.reload
-    get :review, id: @place.id
+    get :index_unreviewed, id: @place.id
     assert_response :redirect
   end
 
@@ -112,5 +112,44 @@ class PlacesControllerTest < ActionController::TestCase
                            city: 'Berlin',
                           }
     assert_not Place.find_by(name: 'andere katze').reviewed
+  end
+
+  # Auditing
+  test 'Updating a point increases number of versions' do
+    post :create, place: { name: 'SomePlace',
+                           street: 'Schulze-Boysen-Straße',
+                           house_number: '15',
+                           postal_code: '10365',
+                           city: 'Berlin',
+                          }
+    p = Place.find_by_name('SomePlace')
+    assert_difference 'p.versions.length' do
+      p.update_attributes(name: 'SomeOtherPlace')
+    end
+  end
+
+  test 'Version is 1 for new points' do
+    post :create, place: { name: 'SomePlace',
+                           street: 'Schulze-Boysen-Straße',
+                           house_number: '15',
+                           postal_code: '10365',
+                           city: 'Berlin',
+                          }
+    p = Place.find_by_name('SomePlace')
+    assert_equal 1, p.versions.length
+  end
+
+  test 'Updating translation record increases associated place versions' do
+    post :create, place: { name: 'SomePlace',
+                           street: 'Schulze-Boysen-Straße',
+                           house_number: '15',
+                           postal_code: '10365',
+                           city: 'Berlin',
+                           description_en: 'This is some place'
+                          }
+    p = Place.find_by_name('SomePlace')
+    assert_difference 'p.versions.length' do
+      p.update_attributes(description_en: 'This is some edit')
+    end
   end
 end
