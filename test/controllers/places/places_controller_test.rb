@@ -51,7 +51,7 @@ class PlacesControllerTest < ActionController::TestCase
                                          street: 'Schulze-Boysen-Straße',
                                          house_number: '15',
                                          postal_code: '10365',
-                                         city: 'Berlin',
+                                         city: 'Berlin'
                                         }
     @place.reload.name
     assert_equal 'Blubb', @place.name

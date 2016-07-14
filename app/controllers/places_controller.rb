@@ -24,12 +24,15 @@ class PlacesController < ApplicationController
 
   def review
     @place = Place.find(params[:id])
+
+    # Provide instance variables for version browsing
+    # Falsch => set translations ids only for unreviewed translations
     @current_version_ids = {
       place: params[:place_version] || @place.versions.last.id,
-      translations: params[:translations_versions] || latest_translation_versions(@place)
+      translations: params[:translations_versions] || @place.latest_translation_versions
     }
     @place = @place.versions.find(@current_version_ids[:place].to_i).reify || @place
-    @translations = @place.translations.map do |t|
+    @unreviewed_translations = @place.translations_with_changes.map do |t|
       t.versions.find(@current_version_ids[:translations][t.locale].to_i).reify || t
     end
     @last_reviewed_place = @place.last_reviewed_version_of(@place)
@@ -39,7 +42,6 @@ class PlacesController < ApplicationController
     @place = Place.find(params[:id])
     @place.reviewed = (signed_in? ? true : false)
     if simple_captcha_valid? || signed_in?
-      save_translations_updates
       save_place_update
     else
       flash.now[:danger] = 'Captcha not valid!'
@@ -59,9 +61,9 @@ class PlacesController < ApplicationController
 
   def create
     @place = Place.new(place_params)
-    @place.reviewed = true if signed_in?
+    @place.reviewed = signed_in? ? true : false
     if simple_captcha_valid? || signed_in?
-      save_new
+      save_new_place
     else
       flash.now[:danger] = 'Captcha not valid!'
       render :new
@@ -77,7 +79,7 @@ class PlacesController < ApplicationController
 
   private
 
-  def save_new
+  def save_new_place
     if @place.save
       flash[:success] = 'Point successfully created!'
       redirect_to action: 'index'
@@ -88,20 +90,20 @@ class PlacesController < ApplicationController
   end
 
   # Save Updates on places and translations seperately in order to not accidentally create duplicate versions
-  def extract_place_attr_from(place_params)
-    place_params.keys.grep(/^(description_)/).map do |k|
+  def extract_place_attr_from_place_params
+    place_params.keys.grep(/^((?!description))/).map do |k|
       [k, place_params[k]]
     end.to_h
   end
 
-  def extract_translation_attr_from(place_params)
+  def extract_translation_attr_from_place_params
     place_params.keys.grep(/description_/).map do |k|
       [k, place_params[k]]
     end.to_h
   end
 
   def changed_descriptions
-    changes = extract_translation_attr_from(place_params).keys.map do |descr_in_lang|
+    changes = extract_translation_attr_from_place_params.keys.map do |descr_in_lang|
       locale = descr_in_lang.split('_').last
       translation = @place.translations.find_by(locale: locale)
       translation.description = params['place'][descr_in_lang]
@@ -114,12 +116,14 @@ class PlacesController < ApplicationController
     changed_descriptions.each do |locale, description_changes|
       translation = @place.translations.find_by(locale: locale)
       translation.update_attributes(reviewed: (signed_in? ? true : false),
-                                    description: description_changes['description'].last)
+                                    description: description_changes['description'].last,
+                                    auto_translated: false)
     end
   end
 
   def save_place_update
-    if @place.update_attributes(extract_place_attr_from(place_params))
+    if @place.update_attributes(extract_place_attr_from_place_params)
+      save_translations_updates
       flash.now[:success] = 'Point successfully changed!'
       redirect_to places_path
     else
@@ -141,9 +145,5 @@ class PlacesController < ApplicationController
       flash.now[:danger] = 'Access to this page has been restricted. Please login first!'
       redirect_to login_path
     end
-  end
-
-  def make_revert_link
-    view_context.link_to 'Revert changes!', revert_path(@place.versions.last), method: :post
   end
 end

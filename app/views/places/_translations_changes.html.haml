@@ -1,7 +1,7 @@
 .translations
   %h4
     = t('description')
-  - @translations.each do |translation|
+  - @unreviewed_translations.each do |translation|
     .translation
       .translation-header
         = locale_to_name(translation.locale)

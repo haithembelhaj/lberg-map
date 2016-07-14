@@ -22,19 +22,31 @@ class Place < ActiveRecord::Base
   ## AUDITING
   has_paper_trail ignore: [:translation]
 
+  # Maybe refactor => Add to PaperTrail module
   def has_history?(obj)
     obj.versions.length > 1
   end
 
-  def last_reviewed_version_of(obj)
-    if has_history?(obj)
-      obj.versions[1..-1].map(&:reify).select(&:reviewed).last
-    elsif obj.reviewed
-      obj
+  def latest_translation_versions
+    translations.map { |t| [t.locale, t.versions.last.id] }.to_h
+  end
+
+  def translations_with_changes
+    translations.select do |translation|
+      !translation.reviewed || has_history?(translation)
     end
   end
 
-  ## Language and autotranslation related stuff -> URGENTLY REFACTOR!
+  def last_reviewed_version_of(obj)
+    if obj.reviewed
+      obj
+    elsif has_history?(obj)
+      obj.versions[1..-1].map(&:reify).select(&:reviewed).last
+    end
+  end
+
+  ## Language and autotranslation related stuff
+  # Maybe refactor
   def emptyish?(obj)
     obj.nil? || obj.empty? || obj.split(' ').length == 1
   end
@@ -43,21 +55,21 @@ class Place < ActiveRecord::Base
     translations.select { |t| t.auto_translated || emptyish?(t.description) }
   end
 
+  def locales_of_empty_descriptions
+    autotranslated_or_empty_descriptions.map(&:locale)
+  end
+
   def translations_with_descriptions
     translations - autotranslated_or_empty_descriptions
   end
 
-  def available_descriptions
-    translations_with_descriptions.map(&:locale).join(', ')
-  end
+  # def available_descriptions
+  #   translations_with_descriptions.map(&:locale).join(', ')
+  # end
 
-  def empty_descriptions
-    autotranslated_or_empty_descriptions.map(&:locale).join(', ')
-  end
-
-  def self.places_with_missing_or_empty_translations
-    all.select { |p| p.autotranslated_or_empty_descriptions.any? }
-  end
+  # def empty_descriptions
+  #   autotranslated_or_empty_descriptions.map(&:locale).join(', ')
+  # end
 
   def guess_native_language_description
     # GUESS NATIVE LANGUAGE (simple: longest description)
@@ -66,24 +78,26 @@ class Place < ActiveRecord::Base
     end.last
   end
 
-  def auto_translate
-    available_locales = I18n.available_locales
-    native_translation = guess_native_language_description
-    translator = BingTranslatorWrapper.new(ENV['bing_id'], ENV['bing_secret'], ENV['microsoft_account_key'])
-    if translator && native_translation
-      languages_of_empty_descriptions = available_locales - translations_with_descriptions.map(&:locale)
-      languages_of_empty_descriptions.each do |missing_language|
-        auto_translation = translator.failsafe_translate(
-          native_translation.description,
-          native_translation.locale.to_s,
-          missing_language.to_s
-        )
-        translation = translations.find_by(locale: missing_language)
-        translation.without_versioning do
-          translation.update_attributes(description: auto_translation, auto_translated: true)
-        end
+  def auto_translate_empty_descriptions
+    locales_of_empty_descriptions.each do |missing_locale|
+      auto_translation = @translator.failsafe_translate(
+        @native_translation.description,
+        @native_translation.locale.to_s,
+        missing_locale.to_s
+      )
+      translation = translations.find_by(locale: missing_locale)
+      translation.without_versioning do
+        translation.update_attributes(description: auto_translation,
+                                      auto_translated: true,
+                                      reviewed: false)
       end
     end
+  end
+
+  def auto_translate
+    @native_translation = guess_native_language_description
+    @translator = BingTranslatorWrapper.new(ENV['bing_id'], ENV['bing_secret'], ENV['microsoft_account_key'])
+    auto_translate_empty_descriptions if @translator && @native_translation
   end
 
   ## CATEGORY TAGGING

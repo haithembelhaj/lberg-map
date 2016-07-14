@@ -13,7 +13,6 @@ class PlaceTest < ActiveSupport::TestCase
   test 'geocoding_with_nodes returns false if address not found' do
     @place.save
     @place.reload
-    debugger
     assert @place.latitude
     assert @place.longitude
   end

@@ -30,8 +30,4 @@ class ApplicationController < ActionController::Base
   def is_admin?
     signed_in? && @current_user.is_admin
   end
-
-  def latest_translation_versions(obj)
-    obj.translations.map { |t| [t.locale, t.versions.last.id] }.to_h
-  end
 end
