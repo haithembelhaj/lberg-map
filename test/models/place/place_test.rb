@@ -1,4 +1,4 @@
-require_relative '../test_helper'
+require 'test_helper'
 
 class PlaceTest < ActiveSupport::TestCase
   def setup
@@ -38,10 +38,5 @@ class PlaceTest < ActiveSupport::TestCase
 
   test 'duplicate entries not valid' do
     skip('To be defined: Duplicate entries not valid')
-  end
-
-  # GEOCODING
-  test 'geocoding_with_nodes returns false if address not found' do
-    Place.geocoding_with_nodes
   end
 end

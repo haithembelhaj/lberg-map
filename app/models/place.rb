@@ -60,7 +60,6 @@ class Place < ActiveRecord::Base
   end
 
   def guess_native_language_description
-    available_locales = I18n.available_locales
     # GUESS NATIVE LANGUAGE (simple: longest description)
     translations_with_descriptions.sort_by do |t|
       t.description.length
@@ -74,10 +73,15 @@ class Place < ActiveRecord::Base
     if translator && native_translation
       languages_of_empty_descriptions = available_locales - translations_with_descriptions.map(&:locale)
       languages_of_empty_descriptions.each do |missing_language|
-        auto_translation = translator.failsafe_translate(native_translation.description,
-        native_translation.locale.to_s,
-        missing_language.to_s)
-        translations.find_by(locale: missing_language).update(description: auto_translation, auto_translated: true)
+        auto_translation = translator.failsafe_translate(
+          native_translation.description,
+          native_translation.locale.to_s,
+          missing_language.to_s
+        )
+        translation = translations.find_by(locale: missing_language)
+        translation.without_versioning do
+          translation.update_attributes(description: auto_translation, auto_translated: true)
+        end
       end
     end
   end
