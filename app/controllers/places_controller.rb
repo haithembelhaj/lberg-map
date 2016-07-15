@@ -23,16 +23,16 @@ class PlacesController < ApplicationController
   end
 
   def review
-    @place = Place.find(params[:id])
+    place = Place.find(params[:id])
 
     # Provide instance variables for version browsing
-    # Falsch => set translations ids only for unreviewed translations
+    # TODO: set translations ids only for unreviewed translations
     @current_version_ids = {
-      place: params[:place_version] || @place.versions.last.id,
-      translations: params[:translations_versions] || @place.latest_translation_versions
+      place: params[:place_version] || place.versions.last.id,
+      translations: params[:translations_versions] || place.unreviewed_translation_versions_ids
     }
-    @place = @place.versions.find(@current_version_ids[:place].to_i).reify || @place
-    @unreviewed_translations = @place.translations_with_changes.map do |t|
+    @place = place.versions.find(@current_version_ids[:place].to_i).reify || place
+    @unreviewed_translations = @place.unreviewed_translations.map do |t|
       t.versions.find(@current_version_ids[:translations][t.locale].to_i).reify || t
     end
     @last_reviewed_place = @place.last_reviewed_version_of(@place)
@@ -113,10 +113,10 @@ class PlacesController < ApplicationController
   end
 
   def save_translations_updates
-    changed_descriptions.each do |locale, description_changes|
+    changed_descriptions.each do |locale, changes|
       translation = @place.translations.find_by(locale: locale)
       translation.update_attributes(reviewed: (signed_in? ? true : false),
-                                    description: description_changes['description'].last,
+                                    description: changes['description'].last,
                                     auto_translated: false)
     end
   end

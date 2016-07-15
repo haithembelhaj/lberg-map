@@ -5,8 +5,9 @@
     .translation
       .translation-header
         = locale_to_name(translation.locale)
+        = "(reviewed: #{translation.reviewed}, auto_translated: #{translation.auto_translated})"
       %div{ class: "description_#{translation.locale}" }
-        - if @place.has_history?(translation) || !translation.reviewed
+        - if !translation.reviewed
           = raw(translation.description)
         - else
           no recent changes

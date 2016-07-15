@@ -6,6 +6,16 @@ class PlacesControllerTest < ActionController::TestCase
     @user = users :Norbert
   end
 
+  def post_some_place
+    post :create, place: { name: 'SomePlace',
+                           street: 'Schulze-Boysen-Straße',
+                           house_number: '15',
+                           postal_code: '10365',
+                           city: 'Berlin',
+                           description_en: 'This is some place'
+                          }
+  end
+
   # Place
   test 'can access review if logged in' do
     @place.save
@@ -25,28 +35,21 @@ class PlacesControllerTest < ActionController::TestCase
 
   test 'review flag true if signed in on create' do
     session[:user_id] = @user.id
-    post :create, place: { name: 'katze',
-                           street: 'Schulze-Boysen-Straße',
-                           house_number: '15',
-                           postal_code: '10365',
-                           city: 'Berlin',
-                          }
-    assert Place.find_by(name: 'katze').reviewed
+    post_some_place
+    assert Place.find_by(name: 'SomePlace').reviewed
   end
 
   test 'review flag false if not logged in on create' do
     session[:user_id] = nil
-    post :create, place: { name: 'andere katze',
-                           street: 'Schulze-Boysen-Straße',
-                           house_number: '15',
-                           postal_code: '10365',
-                           city: 'Berlin',
-                          }
-    assert_not Place.find_by(name: 'andere katze').reviewed
+    post_some_place
+    assert_not Place.find_by(name: 'SomePlace').reviewed
   end
-  # Translations
 
+  # Translations
   test "review flag true on translation if signed in on update" do
-    skip
+    session[:user_id] = @user.id
+    post_some_place
+    t = Place.find_by(name: 'SomePlace').translations.find_by(locale: 'en')
+    assert t.reviewed
   end
 end

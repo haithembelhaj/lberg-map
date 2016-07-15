@@ -31,10 +31,18 @@ class Place < ActiveRecord::Base
     translations.map { |t| [t.locale, t.versions.last.id] }.to_h
   end
 
-  def translations_with_changes
+  def unreviewed_translations
     translations.select do |translation|
-      !translation.reviewed || has_history?(translation)
+      !translation.reviewed
     end
+  end
+
+  def unreviewed_translation_versions_ids
+    unreviewed_translations.map { |t| [t.locale, t.versions.last.id] }.to_h
+  end
+
+  def unreviewed_place_versions
+    !reviewed || has_history?(self)
   end
 
   def last_reviewed_version_of(obj)
@@ -42,6 +50,16 @@ class Place < ActiveRecord::Base
       obj
     elsif has_history?(obj)
       obj.versions[1..-1].map(&:reify).select(&:reviewed).last
+    end
+  end
+
+  def last_unreviewed_version_of(obj)
+    if !obj.reviewed
+      obj
+    elsif has_history?(obj)
+      obj.versions[1..-1].select do |version|
+        !version.reify.reviewed
+      end.last
     end
   end
 
@@ -63,22 +81,13 @@ class Place < ActiveRecord::Base
     translations - autotranslated_or_empty_descriptions
   end
 
-  # def available_descriptions
-  #   translations_with_descriptions.map(&:locale).join(', ')
-  # end
-
-  # def empty_descriptions
-  #   autotranslated_or_empty_descriptions.map(&:locale).join(', ')
-  # end
-
   def guess_native_language_description
-    # GUESS NATIVE LANGUAGE (simple: longest description)
     translations_with_descriptions.sort_by do |t|
       t.description.length
     end.last
   end
 
-  def auto_translate_empty_descriptions
+  def translate_empty_descriptions
     locales_of_empty_descriptions.each do |missing_locale|
       auto_translation = @translator.failsafe_translate(
         @native_translation.description,
@@ -97,7 +106,7 @@ class Place < ActiveRecord::Base
   def auto_translate
     @native_translation = guess_native_language_description
     @translator = BingTranslatorWrapper.new(ENV['bing_id'], ENV['bing_secret'], ENV['microsoft_account_key'])
-    auto_translate_empty_descriptions if @translator && @native_translation
+    translate_empty_descriptions if @translator && @native_translation
   end
 
   ## CATEGORY TAGGING

@@ -3,21 +3,19 @@
   %h4
     = t('place_features')
   .place_features-name
-    - if @place.has_history?(@place) || !@place.reviewed
+    - if !@place.reviewed
       %b
         name:
-      = raw @last_reviewed_place && Differ.diff_by_char(@last_reviewed_place.name, @place.name) || @place.name
-    - else
-      No recent changes
+      = raw @last_reviewed_place && Differ.diff_by_char(@place.name, @last_reviewed_place.name) || @place.name
 
   -# ADDRESS
-  - if @place.has_history?(@place) || !@place.reviewed
-    %p
-      %b
-        address:
-      = raw @last_reviewed_place && Differ.diff_by_char(@last_reviewed_place.address, @place.address) || @place.address
-  - else
-    %p
+  .place_features-address
+    - if !@place.reviewed
+      %p
+        %b
+          address:
+        = raw @last_reviewed_place && Differ.diff_by_char(@place.address, @last_reviewed_place.address) || @place.address
+    - else
       No recent changes
 
   -# Version browsing

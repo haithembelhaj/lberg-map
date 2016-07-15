@@ -8,7 +8,7 @@ module PlacesHelper
     obj.versions.map(&:id).find_index(version_id)
   end
 
-  def adjecent_version_id(obj, current_version_id, direction)
+  def get_adjecent_version_id(obj, current_version_id, direction)
     current_version_id ||= obj.versions.last.id
     current_version_index = get_version_index(obj, current_version_id.to_i)
     version_id = obj.versions.map(&:id)[current_version_index + direction]
@@ -21,13 +21,15 @@ module PlacesHelper
 
   def provide_place_version_browsing
     links = []
-    if previous_version_id = adjecent_version_id(@place, @current_version_ids[:place], -1)
+    links << "#{get_version_date(@current_version_ids[:place.to_sym])}: "
+    previous_version_id = get_adjecent_version_id(@place, @current_version_ids[:place], -1)
+    debugger
+    if previous_version = @place.previous_version
       links << link_to('< Previous change ',
                        place_version: previous_version_id,
                        translations_versions: @current_version_ids[:translations])
     end
-    links << "(#{get_version_date(@current_version_ids[:place.to_sym])})"
-    if next_version_id = adjecent_version_id(@place, @current_version_ids[:place], +1)
+    if next_version_id = get_adjecent_version_id(@place, @current_version_ids[:place], +1)
       links << link_to('Next change >',
                        place_version: next_version_id,
                        translations_versions: @current_version_ids[:translations])
@@ -37,21 +39,27 @@ module PlacesHelper
 
   def provide_translation_version_browsing(translation)
     language = translation.locale.to_s
-    links = []
-    prev_translation_version = @current_version_ids[:translations].dup
-    if previous_version_id = adjecent_version_id(translation, prev_translation_version[language], -1)
-      prev_translation_version[language] = previous_version_id
+    links = ["(#{get_version_date(@current_version_ids[:translations][language.to_sym])})"]
+    # Strange variable init
+    previous_translations_versions_ids = @current_version_ids[:translations].dup
+    previous_translation_version_id = get_adjecent_version_id(translation, previous_translations_versions_ids[language], -1)
+    previous_version = translation.previous_version if previous_translation_version_id
+    if previous_version && !previous_version.reviewed
+      previous_translations_versions_ids[language] = previous_version_id
       links << link_to('< Previous change ',
-                       translations_versions: prev_translation_version,
-                       place_version: adjecent_version_id(@place, @current_version_ids[:place], 0))
+                       translations_versions: previous_translations_versions_ids,
+                       place_version: get_adjecent_version_id(@place, @current_version_ids[:place], 0))
     end
-    links << "(#{get_version_date(@current_version_ids[:translations][language.to_sym])})"
-    next_translation_version = @current_version_ids[:translations].dup
-    if next_version_id = adjecent_version_id(translation, next_translation_version[language], +1)
-      next_translation_version[language] = next_version_id
+    # ...same
+    next_translations_versions_ids = @current_version_ids[:translations].dup
+    previous_translations_versions_ids = @current_version_ids[:translations].dup
+    next_translation_version_id = get_adjecent_version_id(translation, next_translations_versions_ids[language], +1)
+    next_version = translation.next_version if next_translation_version_id
+    if next_version && !next_version.reviewed
+      next_translations_versions_ids[language] = next_translation_version_id
       links << link_to('Next change >',
-                       translations_versions: next_translation_version,
-                       place_version: adjecent_version_id(@place, @current_version_ids[:place], 0))
+                       translations_versions: next_translations_versions_ids,
+                       place_version: get_adjecent_version_id(@place, @current_version_ids[:place], 0))
     end
     raw links.join(' ')
   end

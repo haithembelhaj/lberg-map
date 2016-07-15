@@ -5,8 +5,8 @@
     %thead
       %th.col-md-1
       %th= Place.human_attribute_name('name')
-      %th= Place.human_attribute_name('address')
-      %th= Place.human_attribute_name('categories')
+      %th= Place.human_attribute_name('unreviewed_place_changes')
+      %th= Place.human_attribute_name('unreviewed_translations')
       %th= Place.human_attribute_name('updated_at')
     %tbody
     - @places.each do |place|
@@ -23,9 +23,9 @@
         %td
           = place.name
         %td
-          = place.address
+          = place.unreviewed_place_changes?
         %td
-          = generate_categories_filter_links place
+          = place.unreviewed_translations.map { |t| t.locale.to_s }.join(', ')
         %td
           = place.updated_at.to_s(:long)
   = will_paginate

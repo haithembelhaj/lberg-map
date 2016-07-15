@@ -85,7 +85,8 @@ module MassSeedPoints
     place.postal_code = n_random_digits
 
     place.translations.each do |translation|
-      place.translation.update_attributes description: latin_lorem_ipsum(rand(10..90)) if [true, false].sample
+      translation.update_attributes auto_translated: [true, false].sample,
+                                    description: latin_lorem_ipsum(rand(10..90)) if [true, false].sample
     end
     return place
   end
